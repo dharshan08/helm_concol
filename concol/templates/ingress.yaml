@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: odlux-ingress
+  namespace: onap
+  annotations:
+    traefik.ingress.kubernetes.io/router.entrypoints: websecure
+spec:
+  rules:
+    - host: odlux.oam.virtual33.myguest.virtualbox.org
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: odlux
+                port:
+                  number: 8080
+  tls:
+    - hosts:
+        - odlux.oam.virtual33.myguest.virtualbox.org
+

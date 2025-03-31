@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ves-collector
+  namespace: onap
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ves-collector
+  template:
+    metadata:
+      labels:
+        app: ves-collector
+    spec:
+      containers:
+        - name: ves-collector
+          image: nexus3.onap.org:10002/onap/org.onap.dcaegen2.collectors.ves.vescollector:1.12.3-configured
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DMAAPHOST
+              value: "messages"
+
