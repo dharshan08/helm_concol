@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: odlux
-  namespace: onap
   labels:
     app: odlux
 spec:
@@ -14,12 +13,14 @@ spec:
     metadata:
       labels:
         app: odlux
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.rule: Host(`odlux.oam.virtual33.myguest.virtualbox.org`)
+        traefik.ingress.kubernetes.io/router.tls: "true"
     spec:
       containers:
         - name: odlux
           image: nexus3.onap.org:10001/onap/sdnc-web-image:2.6.1
-          ports:
-            - containerPort: 8080
           env:
             - name: ENABLE_OAUTH
               value: "false"
@@ -35,11 +36,23 @@ spec:
               value: "8181"
             - name: SDNRWEBSOCKETPORT
               value: "8182"
+          ports:
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 10
+            periodSeconds: 5
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 5
           volumeMounts:
-            - name: fluentd-config
-              mountPath: /fluentd/etc
+            - name: logs
+              mountPath: /var/log
       volumes:
-        - name: fluentd-config
-          configMap:
-            name: fluentd-config
-
+        - name: logs
+          emptyDir: {}

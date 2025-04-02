@@ -1,23 +1,21 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: odlux-ingress
+  name: ves-collector
+  namespace: onap
   annotations:
     traefik.ingress.kubernetes.io/router.entrypoints: websecure
-    traefik.ingress.kubernetes.io/router.rule: Host(`odlux.oam.virtual33.myguest.virtualbox.org`)
     traefik.ingress.kubernetes.io/router.tls: "true"
 spec:
   rules:
-    - host: odlux.oam.virtual33.myguest.virtualbox.org
+    - host: ves-collector.dcn.virtual33.myguest.virtualbox.org
       http:
         paths:
           - path: /
             pathType: Prefix
             backend:
               service:
-                name: odlux
+                name: ves-collector
                 port:
                   number: 8080
-  tls:
-    - hosts:
-        - odlux.oam.virtual33.myguest.virtualbox.org
+

@@ -3,6 +3,8 @@ kind: Deployment
 metadata:
   name: ves-collector
   namespace: onap
+  labels:
+    app: ves-collector
 spec:
   replicas: 1
   selector:
@@ -12,13 +14,48 @@ spec:
     metadata:
       labels:
         app: ves-collector
+        traefik.enable: "true"
     spec:
+      hostAliases:
+        - ip: "172.1.40.60"
+          hostnames:
+            - "ves-collector.dcn.virtual33.myguest.virtualbox.org"
       containers:
         - name: ves-collector
           image: nexus3.onap.org:10002/onap/org.onap.dcaegen2.collectors.ves.vescollector:1.12.3-configured
-          ports:
-            - containerPort: 8080
           env:
             - name: DMAAPHOST
               value: "messages"
+          ports:
+            - containerPort: 8080
+          volumeMounts:
+            - name: config-volume
+              mountPath: /opt/app/VESCollector/etc/collector.properties
+              subPath: collector.properties
+            - name: config-volume
+              mountPath: /opt/app/VESCollector/etc/ves-dmaap-config.json
+              subPath: ves-dmaap-config.json
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 1
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 5
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 1
+            periodSeconds: 5
+            timeoutSeconds: 4
+            failureThreshold: 5
+          volumeMounts:
+            - name: config-volume
+              mountPath: /opt/app/VESCollector/etc
+      volumes:
+        - name: config-volume
+          configMap:
+            name: ves-collector-config
 

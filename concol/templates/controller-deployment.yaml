@@ -2,7 +2,6 @@ apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: controller
-  namespace: onap
   labels:
     app: controller
 spec:
@@ -14,23 +13,110 @@ spec:
     metadata:
       labels:
         app: controller
+      annotations:
+        traefik.ingress.kubernetes.io/router.entrypoints: websecure
+        traefik.ingress.kubernetes.io/router.rule: Host(`controller.dcn.virtual33.myguest.virtualbox.org`)
+        traefik.ingress.kubernetes.io/router.tls: "true"
     spec:
       containers:
         - name: controller
           image: nexus3.onap.org:10001/onap/sdnc-image:2.6.1
+          env:
+            - name: ENABLE_ODL_CLUSTER
+              value: "false"
+            - name: ENABLE_OAUTH
+              value: "false"
+            - name: ODL_CERT_DIR
+              value: "/opt/opendaylight/current/certs"
+            - name: ODL_ADMIN_PASSWORD
+              value: "Kp8bJ4SXszM0WXlhak3eHlcse2gAw84vaoGGmJvUy2U"
+            - name: SDNC_CONFIG_DIR
+              value: "/opt/onap/ccsdk/data/properties"
+            - name: SDNC_REPLICAS
+              value: "0"
+            - name: CCSDK_REPLICAS
+              value: "0"
+            - name: DOMAIN
+              value: ""
+            - name: SDNRWT
+              value: "true"
+            - name: SDNRONLY
+              value: "true"
+            - name: SDNRINIT
+              value: "true"
+            - name: SDNRDM
+              value: "true"
+            - name: SDNRDBURL
+              value: "http://persistence:9200"
+            - name: SDNR_NETCONF_CALLHOME_ENABLED
+              value: "true"
+            - name: A1_ADAPTER_NORTHBOUND
+              value: "false"
+            - name: JAVA_OPTS
+              value: "-Xms256m -Xmx4g"
+            - name: IDENTITY_PROVIDER_URL
+              value: "https://identity.${HTTP_DOMAIN}"
+            - name: SDNC_WEB_URL
+              value: "https://odlux.oam.virtual33.myguest.virtualbox.org"
+            - name: SDNR_VES_COLLECTOR_ENABLED
+              value: "true"
+            - name: SDNR_VES_COLLECTOR_TLS_ENABLED
+              value: "false"
+            - name: SDNR_VES_COLLECTOR_TRUST_ALL_CERTS
+              value: "true"
+            - name: SDNR_VES_COLLECTOR_IP
+              value: "ves-collector"
+            - name: SDNR_VES_COLLECTOR_PORT
+              value: "8080"
+            - name: SDNR_VES_COLLECTOR_VERSION
+              value: "v7"
+            - name: SDNR_VES_COLLECTOR_REPORTING_ENTITY_NAME
+              value: "ONAP SDN-R"
+            - name: SDNR_VES_COLLECTOR_EVENTLOG_MSG_DETAIL
+              value: "LONG"
+            - name: SDNR_VES_COLLECTOR_USERNAME
+              value: "sample1"
+            - name: SDNR_VES_COLLECTOR_PASSWORD
+              value: "sample1"
           ports:
             - containerPort: 8181
             - containerPort: 8182
-          envFrom:
-            - configMapRef:
-                name: controller-config
-            - secretRef:
-                name: controller-secrets
+            - containerPort: 8080
+          livenessProbe:
+            httpGet:
+              path: /ready
+              port: 8181
+            initialDelaySeconds: 60
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /ready
+              port: 8181
+            initialDelaySeconds: 60
+            periodSeconds: 10
           volumeMounts:
-            - name: config-volume
-              mountPath: /opt/opendaylight/etc/
+            - name: devicemanager-config
+              mountPath: /opt/opendaylight/etc/devicemanager.properties
+              subPath: devicemanager.properties
+            - name: mountpoint-config
+              mountPath: /opt/opendaylight/etc/mountpoint-registrar.properties
+              subPath: mountpoint-registrar.properties
+            - name: certs-properties-config
+              mountPath: /opt/opendaylight/current/certs/certs.properties
+              subPath: certs.properties
+            - name: certs-secret
+              mountPath: /opt/opendaylight/current/certs/keys0.zip
+              subPath: keys0.zip
       volumes:
-        - name: config-volume
-          persistentVolumeClaim:
-            claimName: controller-pvc
-
+        - name: devicemanager-config
+          configMap:
+            name: devicemanager-properties
+        - name: mountpoint-config
+          configMap:
+            name: mountpoint-registrar-config
+        - name: certs-properties-config
+          configMap:
+            name: certs-properties-config
+        - name: certs-secret
+          secret:
+            secretName: certs-secret

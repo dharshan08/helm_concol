@@ -1,0 +1,118 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: devicemanager-properties
+data:
+  devicemanager.properties: |
+    [aai]
+    aaiPropertiesFile=null
+    aaiUrl=off
+    aaiHeaders=["X-TransactionId: 9999"]
+    aaiDeleteOnMountpointRemove=false
+    aaiTrustAllCerts=false
+    aaiApiVersion=aai/v13
+    aaiClientConnectionTimeout=30000
+    aaiApplicationId=SDNR
+    aaiReadTimeout=60000
+    aaiUserCredentials=
+    aaiPcks12ClientCertFile=
+    aaiPcks12ClientCertPassphrase=
+
+    [devicemonitor]
+    SeverityconnectionLossOAM=Major
+    SeverityconnectionLossMediator=Major
+    SeverityconnectionLossNeOAM=Major
+
+    [dmonf]
+    pollAlarms=false
+
+    [toggleAlarmFilter]
+    taEnabled=true
+    taDelay=3000
+
+    [housekeeping]
+    hkEnabled=false
+
+    [dcae]
+    dcaeUrl=off
+    dcaeUserCredentials=admin:admin
+    dcaeHeartbeatPeriodSeconds=120
+
+    [pm]
+    pmEnabled=true
+
+    [VESCollector]
+    VES_COLLECTOR_ENABLED=true
+    VES_COLLECTOR_TLS_ENABLED=false
+    VES_COLLECTOR_TRUST_ALL_CERTS=true
+    VES_COLLECTOR_USERNAME=sample1
+    VES_COLLECTOR_PASSWORD=sample1
+    VES_COLLECTOR_IP=ves-collector
+    VES_COLLECTOR_PORT=8080
+    VES_COLLECTOR_VERSION=v7
+    REPORTING_ENTITY_NAME=ONAP SDN-R
+    EVENTLOG_MSG_DETAIL=LONG
+
+    [dmonf14]
+    useDomApi=${SDNR_ONF14_USEDOMAPI}
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: mountpoint-registrar-config
+data:
+  mountpoint-registrar.properties: |
+    [general]
+    dmaapEnabled=true
+    baseUrl=http://localhost:8181
+    sdnrUser=admin
+    sdnrPasswd=${ODL_ADMIN_PASSWORD}
+
+    [strimzi-kafka]
+    strimziEnabled=true
+    bootstrapServers=kafka:9092
+    securityProtocol=PLAINTEXT
+    saslMechanism=PLAIN
+    saslJaasConfig=PLAIN
+
+    [fault]
+    topic=unauthenticated.SEC_FAULT_OUTPUT
+    consumerGroup=myG
+    consumerID=C1
+    timeout=20000
+    limit=10000
+    fetchPause=5000
+
+    [provisioning]
+    topic=unauthenticated.SEC_3GPP_PROVISIONING_OUTPUT
+    consumerGroup=myG
+    consumerID=C1
+    timeout=20000
+    limit=10000
+    fetchPause=5000
+
+    [pnfRegistration]
+    topic=unauthenticated.VES_PNFREG_OUTPUT
+    consumerGroup=myG
+    consumerID=C1
+    timeout=20000
+    limit=10000
+    fetchPause=5000
+
+    [stndDefinedFault]
+    topic=unauthenticated.SEC_3GPP_FAULTSUPERVISION_OUTPUT
+    consumerGroup=myG
+    consumerID=C1
+    timeout=20000
+    limit=10000
+    fetchPause=5000
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: certs-properties-config
+data:
+  certs.properties: |
+    keys0.zip
+    ***********
+
